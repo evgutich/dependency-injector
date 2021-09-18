@@ -49,7 +49,6 @@ public class AppTest {
     }
 
 
-
     @Test
     void testProviderWithoutBindingForDependency() {
         Injector injector = new InjectorImpl();
@@ -91,6 +90,14 @@ public class AppTest {
     void testValidateInputWithSecondParameterInterface() {
         Injector injector = new InjectorImpl();
         assertThrows(IllegalArgumentException.class, () -> injector.bind(Set.class, SortedSet.class));
+    }
+
+    @Test
+    void testBindSingleton() {
+        Injector injector = new InjectorImpl();
+        injector.bindSingleton(EventDAO.class, InMemoryEventDAOImpl.class);
+        Provider<EventDAO> provider = injector.getProvider(EventDAO.class);
+        assertSame(provider.getInstance(), injector.getProvider(EventDAO.class).getInstance());
     }
 
 }

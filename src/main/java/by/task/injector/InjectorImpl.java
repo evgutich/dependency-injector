@@ -15,18 +15,24 @@ import java.util.stream.Collectors;
 
 public class InjectorImpl implements Injector {
 
-    Map<Class<?>, BeanConfig> bindingMap = new HashMap<>();
+    Map<Class<?>, BeanConfig<?>> bindingMap = new HashMap<>();
 
     @Override
     public <T> Provider<T> getProvider(Class<T> type) {
         Objects.requireNonNull(type);
-        if (bindingMap.get(type) == null) {
+        //noinspection unchecked
+        BeanConfig<T> beanConfig = (BeanConfig<T>) bindingMap.get(type);
+        if (beanConfig == null) {
             return null;
         }
-        Constructor<? extends T> constructor = (Constructor<? extends T>) bindingMap.get(type).getConstructor();
-        Class<?>[] parameterTypes = constructor.getParameterTypes();
+        if (beanConfig.getProvider() != null) {
+            return beanConfig.getProvider();
+        }
+        Class<?>[] parameterTypes = beanConfig.getConstructor().getParameterTypes();
         List<Provider<?>> providers = Arrays.stream(parameterTypes).map(this::getProviderWithMandatoryBinding).collect(Collectors.toList());
-        return new ProviderImpl<T>(constructor, providers);
+        ProviderImpl<T> newProvider = new ProviderImpl<>(beanConfig, providers);
+        beanConfig.setProvider(newProvider);
+        return newProvider;
     }
 
     private <R> Provider<R> getProviderWithMandatoryBinding(Class<R> type) {
@@ -40,7 +46,7 @@ public class InjectorImpl implements Injector {
     @Override
     public <T> void bind(Class<T> intf, Class<? extends T> impl) {
         validateInput(intf, impl);
-        bindingMap.put(intf, new BeanConfig(getImplConstructor(impl), false));
+        bindingMap.put(intf, new BeanConfig<T>(getImplConstructor(impl), false));
     }
 
     private <T> Constructor<? extends T> getImplConstructor(Class<? extends T> impl) {
@@ -57,6 +63,7 @@ public class InjectorImpl implements Injector {
                 throw new ConstructorNotFoundException(impl);
             }
         }
+        //noinspection unchecked
         return (Constructor<? extends T>) constructorsWithInject.get(0);
     }
 
@@ -71,7 +78,7 @@ public class InjectorImpl implements Injector {
     @Override
     public <T> void bindSingleton(Class<T> intf, Class<? extends T> impl) {
         validateInput(intf, impl);
-        bindingMap.put(intf, new BeanConfig(getImplConstructor(impl), true));
+        bindingMap.put(intf, new BeanConfig<T>(getImplConstructor(impl), true));
     }
 
 }
