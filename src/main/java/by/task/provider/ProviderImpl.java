@@ -19,8 +19,8 @@ public class ProviderImpl<T> implements Provider<T> {
 
     @Override
     public T getInstance() {
-        if(config.isSingleton()){
-            if(instance == null){
+        if (config.isSingleton()) {
+            if (instance == null) {
                 instance = createInstance();
             }
             return instance;

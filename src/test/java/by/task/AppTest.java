@@ -22,9 +22,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class AppTest {
     @Test
     void testExistingBinding() {
-        Injector injector = new InjectorImpl(); //создаем имплементацию инжектора
-        injector.bind(EventDAO.class, InMemoryEventDAOImpl.class); //добавляем в инжектор реализацию интерфейса
-        Provider<EventDAO> daoProvider = injector.getProvider(EventDAO.class); //получаем инстанс класса из инжектора
+        Injector injector = new InjectorImpl();
+        injector.bind(EventDAO.class, InMemoryEventDAOImpl.class);
+        Provider<EventDAO> daoProvider = injector.getProvider(EventDAO.class);
         assertNotNull(daoProvider);
         assertNotNull(daoProvider.getInstance());
         assertSame(InMemoryEventDAOImpl.class, daoProvider.getInstance().getClass());

@@ -4,6 +4,7 @@ import by.task.annotation.Inject;
 import by.task.dao.EventDAO;
 
 public class EventServiceImpl implements EventService {
+
     EventDAO eventDAO;
 
     @Inject
